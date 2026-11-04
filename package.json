@@ -24,7 +24,7 @@
     "lint:fix": "npm run lint:fix --workspace server && npm run lint:fix --workspace client",
     "format": "prettier --write \"**/*.{js,mjs,ts,tsx,json,css,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{js,mjs,ts,tsx,json,css,md,yml,yaml}\"",
-    "test": "npm run test --workspace server",
+    "test": "npm run test --workspace server && npm run test --workspace client",
     "test:coverage": "npm run test:coverage --workspace server",
     "seed": "npm run seed --workspace server",
     "seed:fresh": "npm run seed:fresh --workspace server",
