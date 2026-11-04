@@ -78,11 +78,9 @@ async function applyEntryBalances(
   lines: Array<{ account: Types.ObjectId; debit: number; credit: number }>,
   multiplier: 1 | -1,
 ) {
-  const accounts = await Account.find({
-    organization,
-    _id: { $in: lines.map((line) => line.account) },
-  }).lean();
-  const byId = new Map(accounts.map((account) => [String(account._id), account]));
+  const accountIds = lines.map((line) => String(line.account));
+  const accounts = await Account.find({ organization }).lean();
+  const byId = new Map(accounts.filter((a) => accountIds.includes(String(a._id))).map((account) => [String(account._id), account]));
 
   const updates = lines.map((line) => {
     const account = byId.get(String(line.account));

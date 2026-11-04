@@ -31,7 +31,9 @@ export async function buildDocumentLines(
   const productIds = rawLines
     .map((line) => line.product)
     .filter((id): id is string => Boolean(id) && Types.ObjectId.isValid(String(id)));
-  const products = await Product.find({ _id: { $in: productIds }, organization }).lean();
+  const products = productIds.length
+    ? await Product.find({ _id: { $in: productIds }, organization }).lean()
+    : [];
   const byId = new Map(products.map((product) => [String(product._id), product]));
 
   const prepared = rawLines.map((line) => {
@@ -147,10 +149,13 @@ export async function issueInvoiceStock(
   },
   options: { reserved: boolean; reverse?: boolean; userId?: Types.ObjectId },
 ) {
-  const products = await Product.find({
-    _id: { $in: invoice.items.map((item) => item.product).filter(Boolean) },
-    organization: invoice.organization,
-  }).lean();
+  const productIds = invoice.items.map((item) => item.product).filter(Boolean);
+  const products = productIds.length
+    ? await Product.find({
+        _id: { $in: productIds },
+        organization: invoice.organization,
+      }).lean()
+    : [];
   const trackable = new Set(
     products.filter((product) => product.trackInventory && product.type === 'goods').map((p) => String(p._id)),
   );
