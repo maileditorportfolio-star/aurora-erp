@@ -1,0 +1,44 @@
+{
+  "name": "aurora-erp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aurora ERP — white-label, multi-tenant enterprise resource planning platform",
+  "license": "SEE LICENSE IN LICENSE",
+  "packageManager": "npm@10.9.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "build": "npm run build --workspace server && npm run build --workspace client",
+    "build:server": "npm run build --workspace server",
+    "build:client": "npm run build --workspace client",
+    "start": "concurrently -n api,web -c magenta,cyan \"npm:start:server\" \"npm:start:client\"",
+    "start:server": "npm run start --workspace server",
+    "start:client": "npm run start --workspace client",
+    "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace client",
+    "lint": "npm run lint --workspace server && npm run lint --workspace client",
+    "lint:fix": "npm run lint:fix --workspace server && npm run lint:fix --workspace client",
+    "format": "prettier --write \"**/*.{js,mjs,ts,tsx,json,css,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,ts,tsx,json,css,md,yml,yaml}\"",
+    "test": "npm run test --workspace server",
+    "seed": "npm run seed --workspace server",
+    "seed:fresh": "npm run seed:fresh --workspace server",
+    "check:env": "node scripts/check-env-example.js",
+    "license:generate": "node scripts/generate-license.mjs",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.9.10"
+  },
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  }
+}

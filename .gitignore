@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.test.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+.nyc_output/
+junit*.xml
+test-results/
+
+# Uploads / generated artifacts
+uploads/*
+!uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
+*.pdf
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Secrets / licenses
+*.pem
+*.key
+license-*.json
+!license.example.json
+
+# Docker
+.docker-data/
