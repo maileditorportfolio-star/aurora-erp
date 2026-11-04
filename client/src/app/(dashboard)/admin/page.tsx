@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import {
   FileText,
   KeyRound,
@@ -111,34 +110,8 @@ interface AuditEntry {
   changes?: unknown;
 }
 
-const createOrgSchema = z.object({
-  name: z.string().trim().min(2, 'Enter a workspace name').max(120),
-  slug: z
-    .string()
-    .trim()
-    .min(2)
-    .max(63)
-    .regex(/^[a-z0-9-]+$/, 'Use lowercase letters, numbers and hyphens only')
-    .optional()
-    .or(z.literal('')),
-  ownerEmail: z.string().trim().email('Enter a valid owner email'),
-  plan: z.enum(['starter', 'professional', 'enterprise']),
-  status: z.enum(['active', 'trial', 'suspended']),
-});
-type CreateOrgValues = z.infer<typeof createOrgSchema>;
-
-const editOrgSchema = z.object({
-  name: z.string().trim().min(2).max(120).optional(),
-  plan: z.enum(['starter', 'professional', 'enterprise']).optional(),
-  status: z.enum(['active', 'trial', 'suspended', 'cancelled']).optional(),
-  appName: z.string().max(80).optional(),
-  brandColor: z
-    .string()
-    .regex(/^#[0-9a-fA-F]{6}$/)
-    .optional()
-    .or(z.literal('')),
-});
-type EditOrgValues = z.infer<typeof editOrgSchema>;
+import type { CreateOrgValues, EditOrgValues } from '@/lib/schemas/admin';
+import { createOrgSchema, editOrgSchema } from '@/lib/schemas/admin';
 
 const RESOURCES = [
   '',
