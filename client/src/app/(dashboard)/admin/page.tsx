@@ -5,24 +5,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import {
-  FileText,
   KeyRound,
   Plus,
-  Search,
   ShieldCheck,
-  UserCog,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Badge, StatusBadge } from '@/components/ui/badge';
-import { DataTable } from '@/components/data/data-table';
-import { Pagination } from '@/components/data/pagination';
-import { SearchInput } from '@/components/data/search-input';
 import { FormField } from '@/components/data/form-field';
 import { ConfirmDialog } from '@/components/data/confirm-dialog';
 import { PageHeader } from '@/components/layout/page-header';
+import { OrganizationsTab } from '@/components/admin/OrganizationsTab';
+import type { AdminOrganization } from '@/components/admin/OrganizationsTab';
+import { UsersTab } from '@/components/admin/UsersTab';
+import type { AdminUser } from '@/components/admin/UsersTab';
+import { AdminAuditTab } from '@/components/admin/AuditTab';
+import type { AuditEntry } from '@/components/admin/AuditTab';
 
 import {
   Dialog,
@@ -38,7 +38,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { notifyError, notifySuccess } from '@/hooks/use-resource';
 import { api, buildQuery } from '@/lib/api';
 import { formatCurrency, formatDateTime, formatNumber } from '@/lib/formatters';
-import { initials, refName } from '@/lib/utils';
+import { refName } from '@/lib/utils';
 import type { PaginationMeta } from '@/lib/types';
 
 interface PlatformStats {
@@ -65,83 +65,11 @@ interface LicenseStatus {
   appVersion?: string;
 }
 
-interface AdminOrganization {
-  id: string;
-  name: string;
-  slug: string;
-  email?: string;
-  plan: string;
-  status: string;
-  logoUrl?: string;
-  brandColor?: string;
-  appName?: string;
-  createdAt?: string;
-  trialEndsAt?: string;
-  memberCount?: number;
-  owner?: { id?: string; name?: string; email?: string } | string;
-  invoiceCount?: number;
-  revenue?: number;
-}
 
-interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  status?: string;
-  isSuperAdmin: boolean;
-  lastLoginAt?: string;
-  createdAt?: string;
-  avatarUrl?: string;
-}
 
-interface AuditEntry {
-  id: string;
-  organization?: { id?: string; name?: string; slug?: string } | string;
-  actor?: { id?: string; name?: string; email?: string } | string;
-  actorName?: string;
-  action: string;
-  resource: string;
-  resourceId?: string;
-  method?: string;
-  path?: string;
-  statusCode?: number;
-  ip?: string;
-  createdAt: string;
-  changes?: unknown;
-}
 
 import type { CreateOrgValues, EditOrgValues } from '@/lib/schemas/admin';
 import { createOrgSchema, editOrgSchema } from '@/lib/schemas/admin';
-
-const RESOURCES = [
-  '',
-  'customers',
-  'products',
-  'categories',
-  'warehouses',
-  'suppliers',
-  'employees',
-  'invoices',
-  'quotations',
-  'sales_orders',
-  'payments',
-  'purchase_orders',
-  'goods_receipts',
-  'bills',
-  'accounts',
-  'transactions',
-  'journal',
-  'payroll',
-  'leaves',
-  'attendance',
-  'notifications',
-  'team',
-  'organization',
-  'users',
-  'organizations',
-  'admin',
-];
-const ACTIONS = ['', 'create', 'update', 'delete'];
 
 export default function AdminConsolePage() {
   const { user } = useAuth();
@@ -551,388 +479,6 @@ function OverviewTab({
             <p className="py-6 text-center text-xs text-muted-foreground">No workspaces yet.</p>
           )}
         </div>
-      </Card>
-    </div>
-  );
-}
-
-function OrganizationsTab({
-  orgs,
-  meta,
-  loading,
-  search,
-  status,
-  plan,
-  page,
-  limit,
-  onSearch,
-  onStatus,
-  onPlan,
-  onPage,
-  onLimit,
-  onCreate,
-  onEdit,
-}: {
-  orgs: AdminOrganization[];
-  meta: PaginationMeta | null;
-  loading?: boolean;
-  search: string;
-  status: string;
-  plan: string;
-  page: number;
-  limit: number;
-  onSearch: (v: string) => void;
-  onStatus: (v: string) => void;
-  onPlan: (v: string) => void;
-  onPage: (v: number) => void;
-  onLimit: (v: number) => void;
-  onCreate: () => void;
-  onEdit: (org: AdminOrganization) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <SearchInput value={search} onChange={onSearch} placeholder="Search workspaces…" className="w-full sm:max-w-xs" />
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={status} onChange={(e) => onStatus(e.target.value)} className="h-9 w-36" aria-label="Status">
-            <option value="">All statuses</option>
-            <option value="active">Active</option>
-            <option value="trial">Trial</option>
-            <option value="suspended">Suspended</option>
-            <option value="cancelled">Cancelled</option>
-          </Select>
-          <Select value={plan} onChange={(e) => onPlan(e.target.value)} className="h-9 w-36" aria-label="Plan">
-            <option value="">All plans</option>
-            <option value="starter">Starter</option>
-            <option value="professional">Professional</option>
-            <option value="enterprise">Enterprise</option>
-          </Select>
-          <Button onClick={onCreate}>
-            <Plus />
-            New workspace
-          </Button>
-        </div>
-      </div>
-
-      <Card className="overflow-hidden">
-        <DataTable<AdminOrganization>
-          columns={[
-            {
-              key: 'name',
-              header: 'Workspace',
-              cell: (org) => (
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{org.name}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">{org.slug}</p>
-                </div>
-              ),
-            },
-            {
-              key: 'owner',
-              header: 'Owner',
-              cell: (org) => (
-                <span className="text-xs text-muted-foreground">
-                  {typeof org.owner === 'object' && org.owner ? org.owner.name ?? org.owner.email ?? '—' : refName(org.owner)}
-                </span>
-              ),
-            },
-            { key: 'plan', header: 'Plan', cell: (org) => <Badge variant="outline" className="capitalize">{org.plan}</Badge> },
-            { key: 'status', header: 'Status', cell: (org) => <StatusBadge status={org.status} /> },
-            {
-              key: 'members',
-              header: 'Members',
-              cell: (org) => <span className="text-xs">{formatNumber(org.memberCount ?? 0)}</span>,
-              align: 'right',
-            },
-            {
-              key: 'invoices',
-              header: 'Invoices',
-              cell: (org) => <span className="text-xs">{formatNumber(org.invoiceCount ?? 0)}</span>,
-              align: 'right',
-            },
-            {
-              key: 'revenue',
-              header: 'Revenue',
-              cell: (org) => <span className="text-xs">{formatCurrency(org.revenue ?? 0)}</span>,
-              align: 'right',
-            },
-            {
-              key: 'created',
-              header: 'Created',
-              cell: (org) => <span className="text-[11px] text-muted-foreground">{org.createdAt ? formatDateTime(org.createdAt) : '—'}</span>,
-            },
-            {
-              key: 'actions',
-              header: '',
-              className: 'w-24 text-right',
-              cell: (org) => (
-                <Button variant="outline" size="sm" onClick={() => onEdit(org)}>
-                  <FileText />
-                  Edit
-                </Button>
-              ),
-            },
-          ]}
-          rows={orgs}
-          loading={loading}
-          emptyTitle="No workspaces found"
-          emptyDescription="Create a workspace to get started."
-        />
-        <Pagination meta={meta} page={page} limit={limit} onPageChange={onPage} onLimitChange={onLimit} />
-      </Card>
-    </div>
-  );
-}
-
-function UsersTab({
-  users,
-  meta,
-  loading,
-  search,
-  page,
-  limit,
-  onSearch,
-  onPage,
-  onLimit,
-  onToggle,
-}: {
-  users: AdminUser[];
-  meta: PaginationMeta | null;
-  loading?: boolean;
-  search: string;
-  page: number;
-  limit: number;
-  onSearch: (v: string) => void;
-  onPage: (v: number) => void;
-  onLimit: (v: number) => void;
-  onToggle: (u: AdminUser) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <SearchInput value={search} onChange={onSearch} placeholder="Search users by name or email…" className="w-full sm:max-w-xs" />
-
-      <Card className="overflow-hidden">
-        <DataTable<AdminUser>
-          columns={[
-            {
-              key: 'user',
-              header: 'User',
-              cell: (u) => (
-                <div className="flex items-center gap-3">
-                  <div className="grid size-9 place-items-center rounded-full bg-muted text-xs font-semibold">
-                    {initials(u.name)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{u.name}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">{u.email}</p>
-                  </div>
-                </div>
-              ),
-            },
-            {
-              key: 'status',
-              header: 'Status',
-              cell: (u) => <StatusBadge status={u.status} />,
-            },
-            {
-              key: 'platform',
-              header: 'Platform role',
-              cell: (u) => (
-                <Badge variant={u.isSuperAdmin ? 'warning' : 'outline'}>
-                  {u.isSuperAdmin ? 'Super admin' : 'User'}
-                </Badge>
-              ),
-            },
-            {
-              key: 'lastLogin',
-              header: 'Last login',
-              cell: (u) => <span className="text-[11px] text-muted-foreground">{u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Never'}</span>,
-            },
-            {
-              key: 'created',
-              header: 'Created',
-              cell: (u) => <span className="text-[11px] text-muted-foreground">{u.createdAt ? formatDateTime(u.createdAt) : '—'}</span>,
-            },
-            {
-              key: 'actions',
-              header: '',
-              className: 'w-32 text-right',
-              cell: (u) => (
-                <Button variant="outline" size="sm" onClick={() => onToggle(u)}>
-                  <UserCog />
-                  {u.isSuperAdmin ? 'Revoke' : 'Grant'}
-                </Button>
-              ),
-            },
-          ]}
-          rows={users}
-          loading={loading}
-          emptyTitle="No users found"
-          emptyDescription="Users appear here once they register."
-        />
-        <Pagination meta={meta} page={page} limit={limit} onPageChange={onPage} onLimitChange={onLimit} />
-      </Card>
-    </div>
-  );
-}
-
-function AdminAuditTab({
-  audits,
-  meta,
-  loading,
-  stats,
-  resource,
-  action,
-  actor,
-  org,
-  from,
-  to,
-  page,
-  limit,
-  orgs,
-  users,
-  onResource,
-  onAction,
-  onActor,
-  onOrg,
-  onFrom,
-  onTo,
-  onPage,
-  onLimit,
-  onDetail,
-}: {
-  audits: AuditEntry[];
-  meta: PaginationMeta | null;
-  loading?: boolean;
-  stats: { _id: { resource: string; action: string }; count: number }[];
-  resource: string;
-  action: string;
-  actor: string;
-  org: string;
-  from: string;
-  to: string;
-  page: number;
-  limit: number;
-  orgs: AdminOrganization[];
-  users: AdminUser[];
-  onResource: (v: string) => void;
-  onAction: (v: string) => void;
-  onActor: (v: string) => void;
-  onOrg: (v: string) => void;
-  onFrom: (v: string) => void;
-  onTo: (v: string) => void;
-  onPage: (v: number) => void;
-  onLimit: (v: number) => void;
-  onDetail: (entry: AuditEntry) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <Card className="overflow-hidden">
-        <div className="flex flex-col gap-2 border-b border-border/70 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value={resource} onChange={(e) => onResource(e.target.value)} className="h-9 w-40" aria-label="Resource">
-              {RESOURCES.map((value) => (
-                <option key={value || 'all'} value={value}>
-                  {value ? value.replace(/_/g, ' ') : 'All resources'}
-                </option>
-              ))}
-            </Select>
-            <Select value={action} onChange={(e) => onAction(e.target.value)} className="h-9 w-32" aria-label="Action">
-              {ACTIONS.map((value) => (
-                <option key={value || 'all'} value={value}>
-                  {value || 'All actions'}
-                </option>
-              ))}
-            </Select>
-            <Select value={org} onChange={(e) => onOrg(e.target.value)} className="h-9 w-44" aria-label="Organization">
-              <option value="">All workspaces</option>
-              {orgs.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </Select>
-            <Select value={actor} onChange={(e) => onActor(e.target.value)} className="h-9 w-44" aria-label="Actor">
-              <option value="">All actors</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </Select>
-            <Input type="date" value={from} onChange={(e) => onFrom(e.target.value)} className="h-9 w-36" aria-label="From" />
-            <Input type="date" value={to} onChange={(e) => onTo(e.target.value)} className="h-9 w-36" aria-label="To" />
-          </div>
-        </div>
-
-        {stats.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-b border-border/70 px-4 py-3">
-            {stats.slice(0, 12).map((row, index) => (
-              <Badge key={index} variant="outline" className="text-[10px]">
-                {row._id.resource} · {row._id.action}: {row.count}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        <DataTable<AuditEntry>
-          columns={[
-            {
-              key: 'time',
-              header: 'When',
-              cell: (entry) => <span className="text-xs text-muted-foreground">{formatDateTime(entry.createdAt)}</span>,
-            },
-            {
-              key: 'org',
-              header: 'Workspace',
-              cell: (entry) => <span className="text-xs">{refName(entry.organization)}</span>,
-            },
-            {
-              key: 'actor',
-              header: 'Actor',
-              cell: (entry) => (
-                <span className="text-xs">{entry.actorName ?? refName(entry.actor)}</span>
-              ),
-            },
-            {
-              key: 'action',
-              header: 'Action',
-              cell: (entry) => <Badge variant="outline" className="capitalize">{entry.action}</Badge>,
-            },
-            {
-              key: 'resource',
-              header: 'Resource',
-              cell: (entry) => (
-                <span className="text-xs capitalize">{entry.resource.replace(/_/g, ' ')}</span>
-              ),
-            },
-            {
-              key: 'status',
-              header: 'Status',
-              cell: (entry) => (
-                <Badge variant={(entry.statusCode ?? 200) < 400 ? 'success' : 'destructive'}>
-                  {entry.statusCode ?? '—'}
-                </Badge>
-              ),
-            },
-            {
-              key: 'actions',
-              header: '',
-              className: 'w-12 text-right',
-              cell: (entry) => (
-                <Button variant="ghost" size="icon-sm" onClick={() => onDetail(entry)} aria-label="View">
-                  <Search />
-                </Button>
-              ),
-            },
-          ]}
-          rows={audits}
-          loading={loading}
-          emptyTitle="No audit events"
-          emptyDescription="Platform activity will appear here."
-        />
-
-        <Pagination meta={meta} page={page} limit={limit} onPageChange={onPage} onLimitChange={onLimit} />
       </Card>
     </div>
   );
