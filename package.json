@@ -25,6 +25,7 @@
     "format": "prettier --write \"**/*.{js,mjs,ts,tsx,json,css,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{js,mjs,ts,tsx,json,css,md,yml,yaml}\"",
     "test": "npm run test --workspace server",
+    "test:coverage": "npm run test:coverage --workspace server",
     "seed": "npm run seed --workspace server",
     "seed:fresh": "npm run seed:fresh --workspace server",
     "check:env": "node scripts/check-env-example.js",

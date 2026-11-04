@@ -115,6 +115,7 @@ Root:
 | `npm run lint` | Lint server and client |
 | `npm run typecheck` | Typecheck server and client |
 | `npm run test` | Run server tests |
+| `npm run test:coverage` | Run server tests with coverage (>= 50%) |
 | `npm run seed` | Seed demo data |
 | `npm run seed:fresh` | Reset and re-seed |
 | `npm run check:env` | Validate `.env.example` files |
