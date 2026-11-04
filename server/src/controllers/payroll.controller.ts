@@ -61,10 +61,11 @@ export const payrollController = {
 
     const filter: Record<string, unknown> = {
       organization: req.organizationId,
-      status: { $ne: 'terminated' },
     };
     if (req.body.employeeIds?.length) filter._id = { $in: req.body.employeeIds };
-    const employees = await Employee.find(filter).lean();
+    const employees = (await Employee.find(filter).lean()).filter(
+      (employee) => employee.status !== 'terminated',
+    );
     if (!employees.length) throw ApiError.validation('No eligible employees found');
 
     const existing = await SalarySlip.find({
