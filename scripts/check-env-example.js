@@ -6,11 +6,29 @@ const root = path.resolve(__dirname, '..');
 const checks = [
   {
     file: 'server/.env.example',
-    required: ['MONGODB_URI', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'],
+    required: [
+      'MONGODB_URI',
+      'MONGODB_DB',
+      'JWT_ACCESS_SECRET',
+      'JWT_REFRESH_SECRET',
+      'JWT_ACCESS_EXPIRES_IN',
+      'JWT_REFRESH_EXPIRES_IN',
+      'BCRYPT_ROUNDS',
+      'CLIENT_URL',
+      'CORS_ORIGINS',
+      'LICENSE_ENFORCEMENT',
+      'PORT',
+      'NODE_ENV',
+    ],
   },
   {
     file: 'client/.env.example',
-    required: ['NEXT_PUBLIC_API_URL'],
+    required: [
+      'NEXT_PUBLIC_API_URL',
+      'NEXT_PUBLIC_APP_NAME',
+      'NEXT_PUBLIC_APP_TAGLINE',
+      'NEXT_PUBLIC_DEFAULT_CURRENCY',
+    ],
   },
 ];
 
