@@ -18,7 +18,7 @@ export function softDeletePlugin(schema: mongoose.Schema): void {
     if (options.withDeleted) return;
     const filter = this.getFilter() as Record<string, unknown>;
     if (filter.isDeleted === undefined) {
-      this.setQuery({ ...filter, isDeleted: { $ne: true } });
+      this.where('isDeleted').equals(false);
     }
   };
 

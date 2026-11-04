@@ -94,14 +94,13 @@ export function tenantPlugin(schema: mongoose.Schema): void {
     ) => void,
   ) => void;
 
-  (schema.pre as unknown as InsertManyHook)('insertMany', function (next, docs) {
+  (schema.pre as unknown as (hook: string, fn: (docs: Array<{ organization?: Types.ObjectId }>) => void | Promise<void>) => void)('insertMany', async (docs) => {
     const context = storage.getStore();
-    if (!context?.organizationId || context.skipTenant) return next();
-    if (!Types.ObjectId.isValid(context.organizationId)) return next();
+    if (!context?.organizationId || context.skipTenant) return;
+    if (!Types.ObjectId.isValid(context.organizationId)) return;
     const organization = new Types.ObjectId(context.organizationId);
-    for (const doc of docs) {
+    for (const doc of docs ?? []) {
       if (!doc.organization) doc.organization = organization;
     }
-    next();
   });
 }
