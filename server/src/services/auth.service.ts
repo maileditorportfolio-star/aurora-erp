@@ -5,6 +5,7 @@ import { effectivePermissions, type RoleKey, ROLES } from '../config/permissions
 import { Membership, Organization, RefreshToken, User } from '../models';
 import { ApiError } from '../utils/ApiError';
 import { hashPassword, verifyPassword } from '../utils/password';
+import { bootstrapOrganization } from './organization.service';
 import {
   createRefreshToken,
   hashToken,
@@ -225,6 +226,8 @@ export async function registerOrganization(input: {
     title: 'Owner',
     joinedAt: new Date(),
   });
+
+  await bootstrapOrganization(organization._id);
 
   user.lastLoginAt = new Date();
   await user.save();
